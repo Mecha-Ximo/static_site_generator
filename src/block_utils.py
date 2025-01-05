@@ -16,7 +16,7 @@ def block_to_block_type(block: str):
         return Block.H.value
     if re.match(code_regex, block):
         return Block.CODE.value
-    if block.startswith("> "):
+    if check_quote_block(block):
         return Block.QUOTE.value
     if check_ul_block(block):
         return Block.UL.value
@@ -24,6 +24,14 @@ def block_to_block_type(block: str):
         return Block.OL.value
     
     return Block.P.value
+
+def check_quote_block(block: str):
+    lines = block.split("\n")
+    for line in lines:
+        if not line.startswith("> "):
+            return False
+    
+    return True
 
 def check_ul_block(block: str):
     is_ul = re.match(r"^[*-] ", block)

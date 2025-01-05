@@ -29,7 +29,10 @@ class TestBlockUtils(unittest.TestCase):
         self.assertEqual(block_to_block_type("``` a ```"), "code")
     
     def test_block_to_block_type_quote(self):
-        self.assertEqual(block_to_block_type("> quote"), "quote")
+        self.assertEqual(block_to_block_type("> quote\n> quote"), "quote")
+
+    def test_block_to_block_type_wrong_quote(self):
+        self.assertNotEqual(block_to_block_type("> quote\n* quote"), "quote")
 
     def test_block_to_block_type_ul(self):
         self.assertEqual(block_to_block_type("* quote\n* quote"), "unordered_list")

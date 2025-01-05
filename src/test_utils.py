@@ -3,7 +3,7 @@ import unittest
 from textnode import TextNode, TextType
 from htmlnode import HTMLNode
 from leafnode import LeafNode
-from utils import text_node_to_html_node, split_nodes_delimiter
+from utils import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links
 
 class TestUtils(unittest.TestCase):
     def test_text_to_html_TEXT(self):
@@ -125,3 +125,33 @@ class TestUtils(unittest.TestCase):
             TextNode("text", TextType.BOLD)],
             new_nodes_2
             )
+
+    def test_extract_img_no_matches(self):
+        result = extract_markdown_images("no images")
+
+        self.assertEqual(result, [])
+    
+    def test_extract_img_single_match(self):
+        result = extract_markdown_images("This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif)")
+
+        self.assertEqual(result, [('rick roll', 'https://i.imgur.com/aKaOqIh.gif')])
+
+    def test_extract_img_multi_match(self):
+        result = extract_markdown_images("This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)")
+
+        self.assertEqual(result, [('rick roll', 'https://i.imgur.com/aKaOqIh.gif'), ('obi wan', 'https://i.imgur.com/fJRm4Vk.jpeg')])
+
+    def test_extract_link_no_matches(self):
+        result = extract_markdown_links("This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)")
+
+        self.assertEqual(result , [])
+    
+    def test_extract_link_single_match(self):
+        result = extract_markdown_links("This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)")
+
+        self.assertEqual(result, [('rick roll', 'https://i.imgur.com/aKaOqIh.gif')])
+
+    def test_extract_link_multi_match(self):
+        result = extract_markdown_links("This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and [obi wan](https://i.imgur.com/fJRm4Vk.jpeg)")
+
+        self.assertEqual(result, [('rick roll', 'https://i.imgur.com/aKaOqIh.gif'), ('obi wan', 'https://i.imgur.com/fJRm4Vk.jpeg')])

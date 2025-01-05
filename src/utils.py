@@ -92,5 +92,19 @@ def splitter(old_nodes, text_type):
 
             node.text = parts[1]
 
+        new_nodes.append(node)
+
     new_nodes = list(filter(lambda x: x.text != "", new_nodes))
     return new_nodes
+
+def text_to_textnodes(text: str) -> list[TextNode]:
+    node = TextNode(text, TextType.TEXT)
+
+    return split_nodes_delimiter(
+                split_nodes_delimiter(
+                    split_nodes_delimiter(
+                        split_nodes_link(
+                            split_nodes_image([node])),
+                    "**", TextType.BOLD),
+                "*", TextType.ITALIC),
+            "`", TextType.CODE)

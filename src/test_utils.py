@@ -1,9 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType
-from htmlnode import HTMLNode
-from leafnode import LeafNode
-from utils import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links
+from utils import text_node_to_html_node, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link
 
 class TestUtils(unittest.TestCase):
     def test_text_to_html_TEXT(self):
@@ -155,3 +153,87 @@ class TestUtils(unittest.TestCase):
         result = extract_markdown_links("This is text with a [rick roll](https://i.imgur.com/aKaOqIh.gif) and [obi wan](https://i.imgur.com/fJRm4Vk.jpeg)")
 
         self.assertEqual(result, [('rick roll', 'https://i.imgur.com/aKaOqIh.gif'), ('obi wan', 'https://i.imgur.com/fJRm4Vk.jpeg')])
+
+    def test_split_nodes_image_no_image(self):
+        node = TextNode("some text", TextType.TEXT)
+        result = split_nodes_image([node])
+
+        self.assertEqual(result, [node])
+    
+    def test_split_nodes_image_with_image(self):
+        node = TextNode("some text ![my image](./image.jpg)", TextType.TEXT)
+        result = split_nodes_image([node])
+
+        self.assertEqual(result, [
+            TextNode("some text ", TextType.TEXT),
+            TextNode("my image", TextType.IMAGE, "./image.jpg")
+        ])
+    
+    def test_split_nodes_image_with_multi_image(self):
+        node = TextNode("some text ![my image](./image.jpg) ![my image2](./image.jpg)", TextType.TEXT)
+        result = split_nodes_image([node])
+
+        self.assertEqual(result, [
+            TextNode("some text ", TextType.TEXT),
+            TextNode("my image", TextType.IMAGE, "./image.jpg"),
+            TextNode(" ", TextType.TEXT,),
+            TextNode("my image2", TextType.IMAGE, "./image.jpg")
+        ])
+
+    def test_split_nodes_image_with_multi_node(self):
+        node = TextNode("some text ![my image](./image.jpg) ![my image2](./image.jpg)", TextType.TEXT)
+        node2 = TextNode("some text ![my image](./image.jpg) ![my image2](./image.jpg)", TextType.TEXT)
+        result = split_nodes_image([node, node2])
+
+        self.assertEqual(result, [
+            TextNode("some text ", TextType.TEXT),
+            TextNode("my image", TextType.IMAGE, "./image.jpg"),
+            TextNode(" ", TextType.TEXT,),
+            TextNode("my image2", TextType.IMAGE, "./image.jpg"),
+            TextNode("some text ", TextType.TEXT),
+            TextNode("my image", TextType.IMAGE, "./image.jpg"),
+            TextNode(" ", TextType.TEXT,),
+            TextNode("my image2", TextType.IMAGE, "./image.jpg")
+        ])
+
+    def test_split_nodes_link_no_link(self):
+        node = TextNode("some text", TextType.TEXT)
+        result = split_nodes_link([node])
+
+        self.assertEqual(result, [node])
+
+    def test_split_nodes_link_with_link(self):
+        node = TextNode("some text [my image](./image.jpg)", TextType.TEXT)
+        result = split_nodes_link([node])
+
+        self.assertEqual(result, [
+            TextNode("some text ", TextType.TEXT),
+            TextNode("my image", TextType.LINK, "./image.jpg")
+        ])
+
+    def test_split_nodes_link_with_multi_link(self):
+        node = TextNode("some text [my image](./image.jpg) [my image2](./image.jpg)", TextType.TEXT)
+        result = split_nodes_link([node])
+
+        self.assertEqual(result, [
+            TextNode("some text ", TextType.TEXT),
+            TextNode("my image", TextType.LINK, "./image.jpg"),
+            TextNode(" ", TextType.TEXT,),
+            TextNode("my image2", TextType.LINK, "./image.jpg")
+        ])
+
+    def test_split_nodes_link_with_multi_node(self):
+        node = TextNode("some text [my image](./image.jpg) [my image2](./image.jpg)", TextType.TEXT)
+        node2 = TextNode("some text [my image](./image.jpg) [my image2](./image.jpg)", TextType.TEXT)
+        result = split_nodes_link([node, node2])
+
+        self.assertEqual(result, [
+            TextNode("some text ", TextType.TEXT),
+            TextNode("my image", TextType.LINK, "./image.jpg"),
+            TextNode(" ", TextType.TEXT,),
+            TextNode("my image2", TextType.LINK, "./image.jpg"),
+            TextNode("some text ", TextType.TEXT),
+            TextNode("my image", TextType.LINK, "./image.jpg"),
+            TextNode(" ", TextType.TEXT,),
+            TextNode("my image2", TextType.LINK, "./image.jpg")
+        ])

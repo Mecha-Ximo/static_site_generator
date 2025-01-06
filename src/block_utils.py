@@ -2,7 +2,7 @@ import re
 from block_type import Block
 
 heading_regex = r"^#{1,6} "
-code_regex = r"^`{3}.*`{3}"
+code_regex = r"^`{3}[\s\S]*?`{3}$"
 
 def markdown_to_blocks(markdown: str):
     raw_blocks = markdown.split("\n\n")

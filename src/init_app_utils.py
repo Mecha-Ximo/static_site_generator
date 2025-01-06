@@ -1,6 +1,10 @@
 import os
 import shutil
 
+from block_to_html import markdown_to_html_node
+from html.utils import extract_title
+from inline_utils import text_to_textnodes, text_node_to_html_node
+
 def init_public():
     clean_public()
     create_public()
@@ -55,3 +59,29 @@ def copy_recursive(src_path, dst_path):
             os.mkdir(final_dst_path)
             print(f"- Copying dir: {final_src_path} -> {final_dst_path}")
             copy_recursive(final_src_path, final_dst_path)
+
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+
+    with open(from_path) as md_f:
+        md_content = md_f.read()
+        node = markdown_to_html_node(md_content)
+        html_content = node.to_html()
+
+        inline_converted = ""
+        inline_nodes = text_to_textnodes(html_content)
+        
+        for node in inline_nodes:
+            inline_converted += text_node_to_html_node(node).to_html()
+
+        with open(template_path) as template:
+            template_content = template.read()
+            with_title = template_content.replace("{{ Title }}", extract_title(md_content))
+            with_content = with_title.replace("{{ Content }}", inline_converted)
+
+            with open(dest_path, "w") as dest:
+                dest.write(with_content)
+
+    
+    

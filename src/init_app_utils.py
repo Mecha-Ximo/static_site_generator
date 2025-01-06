@@ -60,6 +60,17 @@ def copy_recursive(src_path, dst_path):
             print(f"- Copying dir: {final_src_path} -> {final_dst_path}")
             copy_recursive(final_src_path, final_dst_path)
 
+def generate_pages_recursively(dir_path_content, template_path, dest_dir_path):
+    for item in os.listdir(dir_path_content):
+        full_path = os.path.join(dir_path_content, item)
+
+        if os.path.isfile(full_path):
+            print(f"-> Convert --{full_path}-- to html")
+            generate_page(full_path, template_path, os.path.join(dest_dir_path, item.replace(".md", ".html")))
+        else:
+            os.mkdir(os.path.join(dest_dir_path, item))
+            generate_pages_recursively(full_path, template_path, os.path.join(dest_dir_path, item))
+
 
 def generate_page(from_path, template_path, dest_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
@@ -71,7 +82,7 @@ def generate_page(from_path, template_path, dest_path):
 
         inline_converted = ""
         inline_nodes = text_to_textnodes(html_content)
-        
+
         for node in inline_nodes:
             inline_converted += text_node_to_html_node(node).to_html()
 
